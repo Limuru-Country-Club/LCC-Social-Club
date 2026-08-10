@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LCC Social Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#F1EEE3;
+    --ivory-2:#E8E3D3;
+    --pine:#1E3A2F;
+    --pine-2:#16241C;
+    --brass:#B8863E;
+    --brass-light:#D9AE6E;
+    --charcoal:#2A2A24;
+    --clay:#A6553B;
+    --line:rgba(30,58,47,0.14);
+    --card:#FBF9F3;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ivory);color:var(--charcoal);font-family:'Inter',sans-serif;}
+  ::selection{background:var(--brass-light);color:var(--pine-2);}
+
+  .app{min-height:100vh;display:flex;flex-direction:column;}
+
+  /* HEADER */
+  header.top{
+    background:var(--pine);
+    color:var(--ivory);
+    padding:22px 28px 0 28px;
+  }
+  .top-inner{max-width:1080px;margin:0 auto;}
+  .brandrow{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .seal{
+    width:42px;height:42px;border-radius:50%;
+    border:1.5px solid var(--brass-light);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif;font-weight:600;font-size:13px;color:var(--brass-light);
+    flex-shrink:0;
+  }
+  .brand-text .name{font-family:'Fraunces',serif;font-size:19px;font-weight:600;letter-spacing:0.2px;}
+  .brand-text .sub{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--brass-light);margin-top:2px;}
+  .who{
+    font-family:'Inter',sans-serif;font-size:13px;color:var(--ivory-2);
+    display:flex;align-items:center;gap:8px;
+  }
+  .who input{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.2);
+    color:var(--ivory);
+    padding:6px 10px;border-radius:6px;font-size:13px;font-family:'Inter',sans-serif;
+    width:130px;
+  }
+  .who input::placeholder{color:rgba(241,238,227,0.5);}
+
+  nav.tabs{
+    max-width:1080px;margin:20px auto 0 auto;
+    display:flex;gap:2px;border-bottom:1px solid rgba(241,238,227,0.15);
+  }
+  nav.tabs button{
+    background:none;border:none;color:rgba(241,238,227,0.55);
+    font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;
+    padding:12px 18px;cursor:pointer;letter-spacing:0.2px;
+    border-bottom:2px solid transparent;transition:color .15s ease;
+  }
+  nav.tabs button:hover{color:var(--ivory);}
+  nav.tabs button.active{color:var(--ivory);border-bottom-color:var(--brass);}
+
+  main{flex:1;max-width:1080px;margin:0 auto;padding:36px 28px 80px 28px;width:100%;}
+
+  /* HERO */
+  .hero{margin-bottom:30px;}
+  .eyebrow{
+    font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--clay);margin-bottom:10px;
+  }
+  h1.hero-title{
+    font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);
+    margin:0 0 10px 0;color:var(--pine-2);line-height:1.08;
+  }
+  .hero-sub{font-size:15.5px;color:#5b5b4f;max-width:520px;line-height:1.5;}
+
+  /* CHIP FILTER */
+  .chiprow{display:flex;flex-wrap:wrap;gap:8px;margin:26px 0 22px 0;}
+  .chip{
+    border:1px solid var(--line);background:var(--card);
+    padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600;
+    cursor:pointer;color:var(--charcoal);display:flex;align-items:center;gap:6px;
+    transition:all .15s ease;
+  }
+  .chip:hover{border-color:var(--brass);}
+  .chip.active{background:var(--pine);color:var(--ivory);border-color:var(--pine);}
+
+  /* NOTICEBOARD */
+  .board{
+    background:var(--ivory-2);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:26px;
+    position:relative;
+  }
+  .board-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+  .board-head h2{font-family:'Fraunces',serif;font-size:20px;margin:0;color:var(--pine-2);}
+  .board-count{font-family:'Space Mono',monospace;font-size:12px;color:#7a7a6c;}
+
+  .pin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;}
+
+  .pin-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:18px 16px 16px 16px;
+    position:relative;
+    box-shadow:0 6px 14px rgba(30,20,10,0.07);
+  }
+  .pin-card:nth-child(3n+1){transform:rotate(-0.6deg);}
+  .pin-card:nth-child(3n+2){transform:rotate(0.5deg);}
+  .pin-card:nth-child(3n){transform:rotate(-0.3deg);}
+  .pin-dot{
+    position:absolute;top:-7px;left:50%;transform:translateX(-50%);
+    width:14px;height:14px;border-radius:50%;
+    box-shadow:0 2px 3px rgba(0,0,0,0.25);
+    border:2px solid var(--card);
+  }
+  .pin-top{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .emblem{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .emblem svg{width:16px;height:16px;}
+  .pin-sport{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:#7a7a6c;}
+  .pin-title{font-family:'Fraunces',serif;font-weight:600;font-size:16.5px;color:var(--pine-2);margin:0 0 4px 0;}
+  .pin-meta{font-size:12.5px;color:#6b6b5e;margin-bottom:8px;}
+  .pin-note{font-size:13px;color:#4a4a3e;line-height:1.45;margin-bottom:12px;}
+  .level-badge{
+    display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;
+    background:rgba(184,134,62,0.15);color:#8a611f;margin-bottom:10px;
+  }
+  .pin-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+  .btn-small{
+    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:700;
+    background:var(--pine);color:var(--ivory);border:none;padding:7px 13px;border-radius:6px;cursor:pointer;
+  }
+  .btn-small:hover{background:var(--pine-2);}
+  .link-remove{background:none;border:none;color:#a08f6a;font-size:11.5px;cursor:pointer;text-decoration:underline;padding:0;}
+
+  .empty-state{text-align:center;padding:50px 20px;color:#7a7a6c;}
+  .empty-state .glyph{font-size:26px;margin-bottom:10px;}
+  .empty-state p{font-size:14px;max-width:340px;margin:6px auto 0 auto;}
+
+  /* FORM (Find a Buddy) */
+  .form-card{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:28px;max-width:560px;
+  }
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12.5px;font-weight:700;color:var(--pine-2);margin-bottom:6px;letter-spacing:0.2px;}
+  .field input, .field select, .field textarea{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;
+    font-family:'Inter',sans-serif;font-size:14px;background:#fff;color:var(--charcoal);
+  }
+  .field textarea{resize:vertical;min-height:64px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .submit-btn{
+    background:var(--pine);color:var(--ivory);border:none;padding:12px 20px;border-radius:8px;
+    font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-top:6px;
+  }
+  .submit-btn:hover{background:var(--pine-2);}
+  .submit-btn:disabled{opacity:0.6;cursor:default;}
+  .confirm-msg{
+    background:rgba(30,58,47,0.08);border:1px solid var(--line);border-radius:8px;
+    padding:10px 14px;font-size:13px;color:var(--pine-2);margin-bottom:16px;
+  }
+
+  /* SPORTS GRID */
+  .sports-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+  .sport-card{
+    background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;
+    cursor:pointer;transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .sport-card:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(30,20,10,0.08);}
+  .sport-card .emblem{width:38px;height:38px;margin-bottom:12px;}
+  .sport-card .emblem svg{width:20px;height:20px;}
+  .sport-card h3{font-family:'Fraunces',serif;font-size:17px;margin:0 0 6px 0;color:var(--pine-2);}
+  .sport-card p{font-size:12.8px;color:#6b6b5e;line-height:1.4;margin:0 0 12px 0;min-height:36px;}
+  .sport-card .count{font-family:'Space Mono',monospace;font-size:11.5px;color:var(--clay);}
+  .badge-soon{
+    display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;
+    background:rgba(166,85,59,0.12);color:var(--clay);margin-left:6px;
+  }
+
+  /* MEMBERS */
+  .members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:20px;}
+  .member-card{
+    background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;
+  }
+  .member-card .mname{font-family:'Fraunces',serif;font-size:15.5px;color:var(--pine-2);margin-bottom:4px;}
+  .member-tags{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0;}
+  .member-tag{
+    font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;
+    background:rgba(30,58,47,0.08);color:var(--pine);
+  }
+  .member-note{font-size:12.5px;color:#6b6b5e;line-height:1.4;}
+
+  /* EVENTS / BULLETIN */
+  .bulletin{
+    background:var(--pine);
+    border-radius:14px;
+    padding:26px;
+    margin-bottom:30px;
+  }
+  .bulletin-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .bulletin-head .ribbon{
+    font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;
+    background:var(--brass);color:var(--pine-2);padding:4px 10px;border-radius:4px;font-weight:700;
+  }
+  .bulletin-head h2{font-family:'Fraunces',serif;color:var(--ivory);font-size:19px;margin:0;}
+  .event-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+  .event-card{
+    background:var(--card);border-radius:10px;padding:18px;border-left:4px solid var(--brass);
+  }
+  .event-type{
+    font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+    color:var(--clay);margin-bottom:8px;
+  }
+  .event-title{font-family:'Fraunces',serif;font-weight:600;font-size:17px;color:var(--pine-2);margin:0 0 6px 0;}
+  .event-date{font-size:12.5px;color:#6b6b5e;font-weight:600;margin-bottom:8px;}
+  .event-desc{font-size:13px;color:#4a4a3e;line-height:1.5;margin-bottom:10px;}
+  .event-foot{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#7a7a6c;}
+
+  .lock-card{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:24px 26px;max-width:420px;margin-bottom:30px;
+  }
+  .lock-card .lock-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .lock-card .lock-icon{
+    width:30px;height:30px;border-radius:50%;background:var(--pine);color:var(--ivory);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .lock-card .lock-icon svg{width:15px;height:15px;}
+  .lock-card h3{font-family:'Fraunces',serif;font-size:16.5px;color:var(--pine-2);margin:0;}
+  .lock-card p{font-size:12.8px;color:#6b6b5e;line-height:1.45;margin:8px 0 14px 0;}
+  .lock-row{display:flex;gap:8px;}
+  .lock-row input{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:'Space Mono',monospace;}
+  .lock-row button{
+    background:var(--pine);color:var(--ivory);border:none;padding:10px 16px;border-radius:8px;
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;
+  }
+  .lock-row button:hover{background:var(--pine-2);}
+  .lock-error{color:var(--clay);font-size:12.5px;margin-top:8px;}
+  .unlocked-strip{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:rgba(30,58,47,0.08);border:1px solid var(--line);border-radius:8px;
+    padding:8px 14px;font-size:12.5px;color:var(--pine-2);margin-bottom:16px;font-weight:600;
+  }
+  .unlocked-strip button{background:none;border:none;color:#8a611f;text-decoration:underline;font-size:12px;cursor:pointer;}
+
+  .section-label{
+    font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--clay);margin:0 0 8px 0;
+  }
+  .section-title{font-family:'Fraunces',serif;font-size:26px;color:var(--pine-2);margin:0 0 6px 0;}
+  .section-sub{font-size:14px;color:#5b5b4f;margin-bottom:26px;max-width:520px;line-height:1.5;}
+
+  .checkgrid{display:flex;flex-wrap:wrap;gap:8px;}
+  .check-pill{
+    border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:12.5px;
+    cursor:pointer;background:#fff;user-select:none;
+  }
+  .check-pill.on{background:var(--pine);color:var(--ivory);border-color:var(--pine);}
+
+  footer{
+    text-align:center;padding:24px;font-family:'Space Mono',monospace;font-size:11px;color:#9a9a8a;
+    border-top:1px solid var(--line);
+  }
+
+  @media (max-width:640px){
+    .row2{grid-template-columns:1fr;}
+    nav.tabs{overflow-x:auto;}
+    nav.tabs button{white-space:nowrap;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="top-inner">
+      <div class="brandrow">
+        <div class="brand">
+          <div class="seal">LCC</div>
+          <div class="brand-text">
+            <div class="name">LCC Social Club</div>
+            <div class="sub">Limuru Country Club · Play buddy noticeboard</div>
+          </div>
+        </div>
+        <div class="who">
+          <span>Posting as</span>
+          <input id="whoInput" type="text" placeholder="your name" maxlength="30" />
+        </div>
+      </div>
+      <nav class="tabs" id="tabs">
+        <button data-tab="overview" class="active">Overview</button>
+        <button data-tab="post">Find a Buddy</button>
+        <button data-tab="events">Events</button>
+        <button data-tab="sports">Sports</button>
+        <button data-tab="members">Members</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main"></main>
+
+  <footer>PINNED BY MEMBERS, FOR MEMBERS — LIMURU COUNTRY CLUB GYMKHANA COMMITTEE</footer>
+</div>
+
+<script type="module">
+/* ---------------- FIREBASE SETUP ---------------- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, deleteDoc, doc,
+  onSnapshot, query, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBm0rgituJYNODCRoxAGDPQvl0_46bU8o8",
+  authDomain: "lcc-social-club.firebaseapp.com",
+  projectId: "lcc-social-club",
+  storageBucket: "lcc-social-club.firebasestorage.app",
+  messagingSenderId: "536402639788",
+  appId: "1:536402639788:web:00606ebedaaab9bd465809"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+
+/* ---------------- DATA ---------------- */
+const SPORTS = [
+  { id:'tennis', name:'Tennis', color:'#2E5E45', blurb:'Short-court rallies to full sets — all levels welcome on the board.', icon:'racket' },
+  { id:'bowling', name:'Bowls', color:'#8A611F', blurb:'Friendly frames and a bit of banter. No lane etiquette lectures.', icon:'bowl' },
+  { id:'swimming', name:'Swimming', color:'#1F5C6B', blurb:'Lengths, laps or just paddling about the shallow end.', icon:'wave' },
+  { id:'running', name:'Running', color:'#A6553B', blurb:'Walk-run groups through to steady 5-10k loops.', icon:'run' },
+  { id:'cycling', name:'Cycling', color:'#3D5A2C', blurb:'Traffic-free loops and longer club rides.', icon:'bike' },
+  { id:'soccer', name:'Soccer', color:'#1E3A2F', blurb:'Small-sided pickup games on the new court.', icon:'ball', soon:true },
+  { id:'golf', name:'Golf', color:'#3F5C3D', blurb:'Fourballs, nine-hole loops, and playing partners for members finding their feet.', icon:'golf' },
+  { id:'basketball', name:'Basketball', color:'#B8863E', blurb:'Half-court pickup and shoot-arounds.', icon:'hoop', soon:true },
+];
+const LEVELS = ['Just trying it','Beginner','Improver','Confident','Any level'];
+const EVENT_TYPES = ['Tournament','Social','Coaching clinic','Club notice'];
+const COMMITTEE_CODE = 'LCC2026'; // change this and share only with the committee
+
+function sportById(id){ return SPORTS.find(s=>s.id===id); }
+
+function iconSvg(kind){
+  const icons = {
+    racket: '<circle cx="12" cy="8" r="6"/><line x1="12" y1="14" x2="12" y2="22"/>',
+    bowl: '<circle cx="9" cy="14" r="5"/><circle cx="18" cy="8" r="2.5"/>',
+    wave: '<path d="M2 12c2 -3 4 -3 6 0s4 3 6 0s4 -3 6 0" fill="none"/><path d="M2 18c2 -3 4 -3 6 0s4 3 6 0s4 -3 6 0" fill="none"/>',
+    run: '<circle cx="14" cy="4" r="2"/><path d="M6 22l4-6 3 2 2-5 4 3" fill="none"/>',
+    bike: '<circle cx="6" cy="17" r="4"/><circle cx="18" cy="17" r="4"/><path d="M6 17l5-9h4l3 9M9 8h5" fill="none"/>',
+    ball: '<circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18" fill="none" stroke-width="0.5"/>',
+    golf: '<circle cx="7" cy="20" r="1.6"/><line x1="7" y1="20" x2="7" y2="3"/><path d="M7 3l9 4.5-9 4.5" fill="currentColor" stroke="none"/>',
+    hoop: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M6 6l12 12M18 6L6 18" fill="none" stroke-width="0.5"/>',
+  };
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">${icons[kind]||icons.ball}</svg>`;
+}
+
+function emblem(sportId, size){
+  const s = sportById(sportId);
+  if(!s) return '';
+  return `<div class="emblem" style="background:${s.color};color:#F1EEE3;width:${size}px;height:${size}px;">${iconSvg(s.icon)}</div>`;
+}
+
+/* ---------------- STATE ---------------- */
+let invites = [];
+let members = [];
+let events = [];
+let activeTab = 'overview';
+let activeFilter = 'all';
+let loadingInvites = true;
+let loadingMembers = true;
+let loadingEvents = true;
+let postSuccess = false;
+let eventSuccess = false;
+let committeeUnlocked = false;
+let lockError = false;
+
+function getWho(){
+  return (document.getElementById('whoInput')?.value || localName || '').trim();
+}
+let localName = '';
+
+/* ---------------- STORAGE (Firestore, real-time) ---------------- */
+function subscribeInvites(){
+  const q = query(collection(db, 'invites'), orderBy('date'));
+  onSnapshot(q, (snap)=>{
+    invites = snap.docs.map(d=> ({ id: d.id, ...d.data() }));
+    loadingInvites = false;
+    render();
+  }, (err)=>{
+    console.error('invites listener failed', err);
+    loadingInvites = false;
+    render();
+  });
+}
+async function addInvite(data){
+  await addDoc(collection(db, 'invites'), { ...data, created: Date.now() });
+}
+async function removeInvite(id){
+  await deleteDoc(doc(db, 'invites', id));
+}
+
+function subscribeMembers(){
+  const q = query(collection(db, 'members'), orderBy('name'));
+  onSnapshot(q, (snap)=>{
+    members = snap.docs.map(d=> ({ id: d.id, ...d.data() }));
+    loadingMembers = false;
+    render();
+  }, (err)=>{
+    console.error('members listener failed', err);
+    loadingMembers = false;
+    render();
+  });
+}
+async function addMember(data){
+  await addDoc(collection(db, 'members'), { ...data, created: Date.now() });
+}
+async function removeMember(id){
+  await deleteDoc(doc(db, 'members', id));
+}
+
+function subscribeEvents(){
+  const q = query(collection(db, 'events'), orderBy('date'));
+  onSnapshot(q, (snap)=>{
+    events = snap.docs.map(d=> ({ id: d.id, ...d.data() }));
+    loadingEvents = false;
+    render();
+  }, (err)=>{
+    console.error('events listener failed', err);
+    loadingEvents = false;
+    render();
+  });
+}
+async function addEvent(data){
+  await addDoc(collection(db, 'events'), { ...data, created: Date.now() });
+}
+async function removeEvent(id){
+  await deleteDoc(doc(db, 'events', id));
+}
+
+/* ---------------- HELPERS ---------------- */
+function timeAgo(ts){
+  const d = Date.now() - ts;
+  const m = Math.floor(d/60000);
+  if(m < 1) return 'just now';
+  if(m < 60) return m+'m ago';
+  const h = Math.floor(m/60);
+  if(h < 24) return h+'h ago';
+  return Math.floor(h/24)+'d ago';
+}
+function fmtDate(str){
+  if(!str) return '';
+  const d = new Date(str+'T00:00:00');
+  if(isNaN(d)) return str;
+  return d.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
+}
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+/* ---------------- RENDER: OVERVIEW ---------------- */
+function renderOverview(){
+  const filtered = activeFilter==='all' ? invites : invites.filter(i=>i.sport===activeFilter);
+  const sorted = [...filtered].sort((a,b)=> (a.date||'').localeCompare(b.date||''));
+
+  let chipsHtml = `<div class="chip ${activeFilter==='all'?'active':''}" data-filter="all">All sports</div>`;
+  SPORTS.forEach(s=>{
+    chipsHtml += `<div class="chip ${activeFilter===s.id?'active':''}" data-filter="${s.id}">${s.name}</div>`;
+  });
+
+  let cardsHtml = '';
+  if(loadingInvites){
+    cardsHtml = `<div class="empty-state"><div class="glyph">&#9679;</div><p>Reading the board…</p></div>`;
+  } else if(sorted.length === 0){
+    cardsHtml = `<div class="empty-state"><div class="glyph">&#128204;</div><p>Nothing pinned here yet. Be the one who starts it — post an invite and see who turns up.</p></div>`;
+  } else {
+    cardsHtml = '<div class="pin-grid">' + sorted.map(inv=>{
+      const s = sportById(inv.sport) || {color:'#999'};
+      return `
+      <div class="pin-card">
+        <div class="pin-dot" style="background:${s.color};"></div>
+        <div class="pin-top">
+          ${emblem(inv.sport,30)}
+          <div class="pin-sport">${s.name || inv.sport}</div>
+        </div>
+        <div class="pin-title">${escapeHtml(inv.host)}'s game</div>
+        <div class="pin-meta">${fmtDate(inv.date)}${inv.time? ' · '+escapeHtml(inv.time):''}</div>
+        <span class="level-badge">${escapeHtml(inv.level)}</span>
+        ${inv.note ? `<div class="pin-note">${escapeHtml(inv.note)}</div>` : ''}
+        <div class="pin-actions">
+          <button class="btn-small" data-join="${inv.id}">I'm in</button>
+          <button class="link-remove" data-remove="${inv.id}">remove</button>
+        </div>
+      </div>`;
+    }).join('') + '</div>';
+  }
+
+  return `
+    <div class="hero">
+      <div class="eyebrow">Sun, 9 Aug &nbsp;·&nbsp; LCC social board</div>
+      <h1 class="hero-title">The board's always open.</h1>
+      <div class="hero-sub">Pin a game, join one already up, or just see who's around this week at Limuru Country Club. No skill required to post — that's the whole point.</div>
+    </div>
+    ${renderBulletinPreview()}
+    <div class="chiprow" id="chiprow">${chipsHtml}</div>
+    <div class="board">
+      <div class="board-head">
+        <h2>Open invitations</h2>
+        <div class="board-count">${sorted.length} pinned</div>
+      </div>
+      ${cardsHtml}
+    </div>
+  `;
+}
+
+/* ---------------- RENDER: BULLETIN PREVIEW (on Overview) ---------------- */
+function renderBulletinPreview(){
+  if(loadingEvents || events.length === 0) return '';
+  const sorted = [...events].sort((a,b)=> (a.date||'').localeCompare(b.date||'')).slice(0,3);
+  return `
+    <div class="bulletin">
+      <div class="bulletin-head">
+        <span class="ribbon">Notice board</span>
+        <h2>Coming up at the club</h2>
+      </div>
+      <div class="event-grid">
+        ${sorted.map(ev=>eventCardHtml(ev)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function eventCardHtml(ev){
+  const s = ev.sport ? sportById(ev.sport) : null;
+  return `
+    <div class="event-card">
+      <div class="event-type">${escapeHtml(ev.type)}${s? ' · '+s.name : ''}</div>
+      <div class="event-title">${escapeHtml(ev.title)}</div>
+      <div class="event-date">${fmtDate(ev.date)}</div>
+      ${ev.desc ? `<div class="event-desc">${escapeHtml(ev.desc)}</div>` : ''}
+      <div class="event-foot">
+        <span>${ev.contact ? 'Contact: '+escapeHtml(ev.contact) : 'Posted by '+escapeHtml(ev.host)}</span>
+        ${committeeUnlocked ? `<button class="link-remove" data-removeevent="${ev.id}">remove</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+/* ---------------- RENDER: EVENTS TAB ---------------- */
+function renderEvents(){
+  const typeOpts = EVENT_TYPES.map(t=>`<option value="${t}">${t}</option>`).join('');
+  const sportOpts = `<option value="">General / all sports</option>` + SPORTS.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  const sorted = [...events].sort((a,b)=> (a.date||'').localeCompare(b.date||''));
+
+  let listHtml = '';
+  if(loadingEvents){
+    listHtml = `<div class="empty-state"><div class="glyph">&#9679;</div><p>Loading notices…</p></div>`;
+  } else if(sorted.length === 0){
+    listHtml = `<div class="empty-state"><div class="glyph">&#128220;</div><p>No notices yet. Committee members can post the first tournament, clinic, or club social below.</p></div>`;
+  } else {
+    listHtml = `<div class="event-grid">${sorted.map(ev=>eventCardHtml(ev)).join('')}</div>`;
+  }
+
+  const posterHtml = committeeUnlocked ? `
+    ${eventSuccess ? `<div class="confirm-msg">Posted to the bulletin board.</div>` : ''}
+    <div class="unlocked-strip">
+      <span>&#128274; Committee posting unlocked for this session</span>
+      <button id="lockAgainBtn">lock again</button>
+    </div>
+    <div class="form-card" style="margin-bottom:30px;">
+      <form id="eventForm">
+        <div class="field">
+          <label>Event title</label>
+          <input type="text" id="e_title" placeholder="e.g. Club Tennis Tournament" required maxlength="60"/>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Type</label>
+            <select id="e_type">${typeOpts}</select>
+          </div>
+          <div class="field">
+            <label>Sport</label>
+            <select id="e_sport">${sportOpts}</select>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Date</label>
+            <input type="date" id="e_date" required/>
+          </div>
+          <div class="field">
+            <label>Your name</label>
+            <input type="text" id="e_host" required maxlength="30" placeholder="Posted by"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Details</label>
+          <textarea id="e_desc" placeholder="e.g. Sign up by 5 Sept, entry open to all levels, knockout format"></textarea>
+        </div>
+        <div class="field">
+          <label>Contact / sign-up (optional)</label>
+          <input type="text" id="e_contact" placeholder="e.g. WhatsApp Priya, or sign-up sheet at reception"/>
+        </div>
+        <button type="submit" class="submit-btn">Post to bulletin board</button>
+      </form>
+    </div>
+  ` : `
+    <div class="lock-card">
+      <div class="lock-head">
+        <div class="lock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></div>
+        <h3>Committee posting</h3>
+      </div>
+      <p>Tournaments and official notices are posted by the gymkhana committee. Enter the committee code to unlock posting for this session.</p>
+      <div class="lock-row">
+        <input type="password" id="committeeCode" placeholder="Committee code" />
+        <button id="unlockBtn">Unlock</button>
+      </div>
+      ${lockError ? `<div class="lock-error">That code didn't match — check with the committee chair.</div>` : ''}
+    </div>
+  `;
+
+  return `
+    <div class="section-label">Tournaments &amp; club notices</div>
+    <div class="section-title">The bulletin board.</div>
+    <div class="section-sub">For anything bigger than a casual game — tournaments, coaching clinics, socials, or committee announcements. Everyone can see it; posting is limited to the committee.</div>
+    ${posterHtml}
+    ${listHtml}
+  `;
+}
+
+/* ---------------- RENDER: POST ---------------- */
+function renderPost(){
+  const opts = SPORTS.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  const levelOpts = LEVELS.map(l=>`<option value="${l}">${l}</option>`).join('');
+  return `
+    <div class="section-label">Post an invitation</div>
+    <div class="section-title">Put a game on the board.</div>
+    <div class="section-sub">Takes ten seconds. Anyone on the board can see it and turn up — you don't need to be any good.</div>
+    ${postSuccess ? `<div class="confirm-msg">Pinned. Head to Overview to see it on the board.</div>` : ''}
+    <div class="form-card">
+      <form id="postForm">
+        <div class="field">
+          <label>Your name</label>
+          <input type="text" id="f_host" placeholder="e.g. Asha" required maxlength="30"/>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Sport</label>
+            <select id="f_sport">${opts}</select>
+          </div>
+          <div class="field">
+            <label>Level</label>
+            <select id="f_level">${levelOpts}</select>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Date</label>
+            <input type="date" id="f_date" required/>
+          </div>
+          <div class="field">
+            <label>Time</label>
+            <input type="text" id="f_time" placeholder="e.g. 5:30pm"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Note (optional)</label>
+          <textarea id="f_note" placeholder="e.g. Bringing spare rackets, total beginner welcome"></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Pin to the board</button>
+      </form>
+    </div>
+  `;
+}
+
+/* ---------------- RENDER: SPORTS ---------------- */
+function renderSports(){
+  const cards = SPORTS.map(s=>{
+    const count = invites.filter(i=>i.sport===s.id).length;
+    return `
+    <div class="sport-card" data-sport="${s.id}">
+      ${emblem(s.id,38)}
+      <h3>${s.name}${s.soon?'<span class="badge-soon">court coming soon</span>':''}</h3>
+      <p>${s.blurb}</p>
+      <div class="count">${count} open ${count===1?'invite':'invites'}</div>
+    </div>`;
+  }).join('');
+  return `
+    <div class="section-label">All disciplines</div>
+    <div class="section-title">Tennis, bowls, swimming, running, cycling, golf &mdash; and soon soccer and basketball.</div>
+    <div class="section-sub">Pick a sport to see who's looking for a game at Limuru Country Club, or jump straight to posting your own.</div>
+    <div class="sports-grid">${cards}</div>
+  `;
+}
+
+/* ---------------- RENDER: MEMBERS ---------------- */
+function renderMembers(){
+  const pillsHtml = SPORTS.map(s=>`<div class="check-pill" data-sport="${s.id}">${s.name}</div>`).join('');
+  let listHtml = '';
+  if(loadingMembers){
+    listHtml = `<div class="empty-state"><div class="glyph">&#9679;</div><p>Loading the directory…</p></div>`;
+  } else if(members.length === 0){
+    listHtml = `<div class="empty-state"><div class="glyph">&#128100;</div><p>No one's opted in yet. Add yourself so others know who's around.</p></div>`;
+  } else {
+    listHtml = '<div class="members-grid">' + members.map(m=>`
+      <div class="member-card">
+        <div class="mname">${escapeHtml(m.name)}</div>
+        <div class="member-tags">${(m.sports||[]).map(id=>{
+          const s = sportById(id); return s ? `<span class="member-tag">${s.name}</span>` : '';
+        }).join('')}</div>
+        ${m.note ? `<div class="member-note">${escapeHtml(m.note)}</div>` : ''}
+        <div style="margin-top:8px;"><button class="link-remove" data-removemember="${m.id}">remove me</button></div>
+      </div>
+    `).join('') + '</div>';
+  }
+  return `
+    <div class="section-label">Member directory</div>
+    <div class="section-title">Meet the club.</div>
+    <div class="section-sub">Opt in so other members can see what you play and reach out directly.</div>
+    <div class="form-card" style="margin-bottom:28px;">
+      <form id="memberForm">
+        <div class="field">
+          <label>Your name</label>
+          <input type="text" id="m_name" required maxlength="30" placeholder="e.g. Chen"/>
+        </div>
+        <div class="field">
+          <label>Sports you're interested in</label>
+          <div class="checkgrid" id="m_pills">${pillsHtml}</div>
+        </div>
+        <div class="field">
+          <label>Note (optional)</label>
+          <input type="text" id="m_note" placeholder="e.g. New to the club, keen to learn tennis"/>
+        </div>
+        <button type="submit" class="submit-btn">Add me to the directory</button>
+      </form>
+    </div>
+    ${listHtml}
+  `;
+}
+
+/* ---------------- MAIN RENDER ---------------- */
+function render(){
+  const main = document.getElementById('main');
+  if(activeTab==='overview') main.innerHTML = renderOverview();
+  else if(activeTab==='post') main.innerHTML = renderPost();
+  else if(activeTab==='events') main.innerHTML = renderEvents();
+  else if(activeTab==='sports') main.innerHTML = renderSports();
+  else if(activeTab==='members') main.innerHTML = renderMembers();
+  attachHandlers();
+}
+
+/* ---------------- EVENT HANDLERS ---------------- */
+function attachHandlers(){
+  // chip filters
+  document.querySelectorAll('#chiprow .chip').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      activeFilter = el.getAttribute('data-filter');
+      render();
+    });
+  });
+
+  // join / remove invite
+  document.querySelectorAll('[data-join]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const id = el.getAttribute('data-join');
+      const inv = invites.find(i=>i.id===id);
+      if(inv){
+        alert(`You're in! Find ${inv.host} at the club to confirm — or post your own invite for ${sportById(inv.sport)?.name || inv.sport} to get others in too.`);
+      }
+    });
+  });
+  document.querySelectorAll('[data-remove]').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      const id = el.getAttribute('data-remove');
+      if(confirm('Remove this invitation from the board?')){
+        await removeInvite(id);
+      }
+    });
+  });
+
+  // post form
+  const postForm = document.getElementById('postForm');
+  if(postForm){
+    postForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const host = document.getElementById('f_host').value.trim();
+      if(!host) return;
+      localName = host;
+      const btn = postForm.querySelector('.submit-btn');
+      btn.disabled = true; btn.textContent = 'Pinning…';
+      try{
+        await addInvite({
+          host,
+          sport: document.getElementById('f_sport').value,
+          level: document.getElementById('f_level').value,
+          date: document.getElementById('f_date').value,
+          time: document.getElementById('f_time').value.trim(),
+          note: document.getElementById('f_note').value.trim(),
+        });
+        postSuccess = true;
+      }catch(err){
+        console.error('post invite failed', err);
+        alert('Could not pin your game — check your connection and try again.');
+      }
+      btn.disabled = false;
+      render();
+    });
+  }
+
+  // member form
+  const memberForm = document.getElementById('memberForm');
+  if(memberForm){
+    let selectedSports = [];
+    document.querySelectorAll('#m_pills .check-pill').forEach(p=>{
+      p.addEventListener('click', ()=>{
+        const id = p.getAttribute('data-sport');
+        if(selectedSports.includes(id)){
+          selectedSports = selectedSports.filter(x=>x!==id);
+          p.classList.remove('on');
+        } else {
+          selectedSports.push(id);
+          p.classList.add('on');
+        }
+      });
+    });
+    memberForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const name = document.getElementById('m_name').value.trim();
+      if(!name) return;
+      localName = name;
+      const btn = memberForm.querySelector('.submit-btn');
+      btn.disabled = true; btn.textContent = 'Adding…';
+      try{
+        await addMember({
+          name,
+          sports: selectedSports,
+          note: document.getElementById('m_note').value.trim(),
+        });
+      }catch(err){
+        console.error('add member failed', err);
+        alert('Could not add you to the directory — check your connection and try again.');
+      }
+      btn.disabled = false;
+      render();
+    });
+  }
+  document.querySelectorAll('[data-removemember]').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      const id = el.getAttribute('data-removemember');
+      if(confirm('Remove yourself from the directory?')){
+        await removeMember(id);
+      }
+    });
+  });
+
+  // committee unlock
+  const unlockBtn = document.getElementById('unlockBtn');
+  if(unlockBtn){
+    const tryUnlock = ()=>{
+      const val = document.getElementById('committeeCode').value.trim();
+      if(val === COMMITTEE_CODE){
+        committeeUnlocked = true;
+        lockError = false;
+      } else {
+        lockError = true;
+      }
+      render();
+    };
+    unlockBtn.addEventListener('click', tryUnlock);
+    document.getElementById('committeeCode').addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){ e.preventDefault(); tryUnlock(); }
+    });
+  }
+  const lockAgainBtn = document.getElementById('lockAgainBtn');
+  if(lockAgainBtn){
+    lockAgainBtn.addEventListener('click', ()=>{
+      committeeUnlocked = false;
+      render();
+    });
+  }
+
+  // event form
+  const eventForm = document.getElementById('eventForm');
+  if(eventForm){
+    eventForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const title = document.getElementById('e_title').value.trim();
+      const host = document.getElementById('e_host').value.trim();
+      if(!title || !host) return;
+      localName = host;
+      const btn = eventForm.querySelector('.submit-btn');
+      btn.disabled = true; btn.textContent = 'Posting…';
+      try{
+        await addEvent({
+          title,
+          type: document.getElementById('e_type').value,
+          sport: document.getElementById('e_sport').value,
+          date: document.getElementById('e_date').value,
+          host,
+          desc: document.getElementById('e_desc').value.trim(),
+          contact: document.getElementById('e_contact').value.trim(),
+        });
+        eventSuccess = true;
+      }catch(err){
+        console.error('post event failed', err);
+        alert('Could not post the notice — check your connection and try again.');
+      }
+      btn.disabled = false;
+      render();
+    });
+  }
+  document.querySelectorAll('[data-removeevent]').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      if(!committeeUnlocked) return;
+      const id = el.getAttribute('data-removeevent');
+      if(confirm('Remove this notice from the bulletin board?')){
+        await removeEvent(id);
+      }
+    });
+  });
+
+  // sport card -> jump to overview filtered
+  document.querySelectorAll('.sport-card').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      activeFilter = el.getAttribute('data-sport');
+      activeTab = 'overview';
+      setActiveTabButton();
+      render();
+    });
+  });
+}
+
+function setActiveTabButton(){
+  document.querySelectorAll('nav.tabs button').forEach(b=>{
+    b.classList.toggle('active', b.getAttribute('data-tab')===activeTab);
+  });
+}
+
+/* ---------------- NAV ---------------- */
+document.getElementById('tabs').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-tab]');
+  if(!btn) return;
+  activeTab = btn.getAttribute('data-tab');
+  postSuccess = false;
+  setActiveTabButton();
+  render();
+});
+
+/* ---------------- INIT ---------------- */
+render();
+subscribeInvites();
+subscribeMembers();
+subscribeEvents();
+</script>
+</body>
+</html>
