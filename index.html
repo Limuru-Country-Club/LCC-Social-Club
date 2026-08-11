@@ -136,6 +136,16 @@
     display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;
     background:rgba(184,134,62,0.15);color:#8a611f;margin-bottom:10px;
   }
+  .team-badge{
+    display:inline-block;font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:20px;
+    background:var(--pine);color:var(--ivory);margin-bottom:10px;letter-spacing:0.5px;text-transform:uppercase;
+  }
+  .type-toggle{display:flex;gap:8px;margin-bottom:16px;}
+  .type-btn{
+    flex:1;text-align:center;padding:10px 8px;border:1px solid var(--line);border-radius:8px;
+    font-size:12.5px;font-weight:700;cursor:pointer;background:#fff;color:#6b6b5e;
+  }
+  .type-btn.active{background:var(--pine);color:var(--ivory);border-color:var(--pine);}
   .pin-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;}
   .btn-small{
     font-family:'Inter',sans-serif;font-size:12.5px;font-weight:700;
@@ -191,6 +201,18 @@
 
   /* MEMBERS */
   .members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:20px;}
+  .feedback-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:20px;}
+  .feedback-card{
+    background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;
+  }
+  .mood-badge{
+    display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:10px;
+  }
+  .mood-great{background:rgba(63,92,61,0.15);color:#3F5C3D;}
+  .mood-good{background:rgba(184,134,62,0.15);color:#8a611f;}
+  .mood-meh{background:rgba(166,85,59,0.12);color:var(--clay);}
+  .feedback-quote{font-size:13.5px;color:#3d3d33;line-height:1.5;margin-bottom:10px;font-style:italic;}
+  .feedback-foot{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:#8a8a7a;}
   .member-card{
     background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;
   }
@@ -305,21 +327,22 @@
         <button data-tab="events">Events</button>
         <button data-tab="sports">Sports</button>
         <button data-tab="members">Members</button>
+        <button data-tab="feedback">Feedback</button>
       </nav>
     </div>
   </header>
 
   <main id="main"></main>
 
-  <footer>PINNED BY MEMBERS, FOR MEMBERS — LIMURU COUNTRY CLUB GYMKHANA COMMITTEE</footer>
+  <footer>LIMURU COUNTRY CLUB GYMKHANA</footer>
 </div>
 
 <script type="module">
 /* ---------------- FIREBASE SETUP ---------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import {
-  getFirestore, collection, addDoc, deleteDoc, doc,
-  onSnapshot, query, orderBy, serverTimestamp
+  getFirestore, collection, addDoc, deleteDoc, updateDoc, doc,
+  onSnapshot, query, orderBy, serverTimestamp, increment
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -335,18 +358,24 @@ const db = getFirestore(fbApp);
 
 /* ---------------- DATA ---------------- */
 const SPORTS = [
-  { id:'tennis', name:'Tennis', color:'#2E5E45', blurb:'Short-court rallies to full sets — all levels welcome on the board.', icon:'racket' },
-  { id:'bowling', name:'Bowls', color:'#8A611F', blurb:'Friendly frames and a bit of banter. No lane etiquette lectures.', icon:'bowl' },
-  { id:'swimming', name:'Swimming', color:'#1F5C6B', blurb:'Lengths, laps or just paddling about the shallow end.', icon:'wave' },
-  { id:'running', name:'Running', color:'#A6553B', blurb:'Walk-run groups through to steady 5-10k loops.', icon:'run' },
-  { id:'cycling', name:'Cycling', color:'#3D5A2C', blurb:'Traffic-free loops and longer club rides.', icon:'bike' },
-  { id:'soccer', name:'Soccer', color:'#1E3A2F', blurb:'Small-sided pickup games on the new court.', icon:'ball', soon:true },
-  { id:'golf', name:'Golf', color:'#3F5C3D', blurb:'Fourballs, nine-hole loops, and playing partners for members finding their feet.', icon:'golf' },
-  { id:'basketball', name:'Basketball', color:'#B8863E', blurb:'Half-court pickup and shoot-arounds.', icon:'hoop', soon:true },
+  { id:'tennis', name:'Tennis', color:'#2E5E45', blurb:'Short-court rallies to full sets — all levels welcome on the board.', icon:'racket', defaultSpots:4 },
+  { id:'bowling', name:'Bowls', color:'#8A611F', blurb:'Friendly frames and a bit of banter. No lane etiquette lectures.', icon:'bowl', defaultSpots:4 },
+  { id:'swimming', name:'Swimming', color:'#1F5C6B', blurb:'Lengths, laps or just paddling about the shallow end.', icon:'wave', defaultSpots:2 },
+  { id:'running', name:'Running', color:'#A6553B', blurb:'Walk-run groups through to steady 5-10k loops.', icon:'run', defaultSpots:4 },
+  { id:'cycling', name:'Cycling', color:'#3D5A2C', blurb:'Traffic-free loops and longer club rides.', icon:'bike', defaultSpots:4 },
+  { id:'soccer', name:'Soccer', color:'#1E3A2F', blurb:'Small-sided pickup games on the new court.', icon:'ball', soon:true, defaultSpots:10 },
+  { id:'golf', name:'Golf', color:'#3F5C3D', blurb:'Fourballs, nine-hole loops, and playing partners for members finding their feet.', icon:'golf', defaultSpots:4 },
+  { id:'cricket', name:'Cricket', color:'#5C4A2E', blurb:'Nets, casual overs, and weekend fixtures for players of any experience.', icon:'cricket', defaultSpots:12 },
+  { id:'basketball', name:'Basketball', color:'#B8863E', blurb:'Half-court pickup and shoot-arounds.', icon:'hoop', soon:true, defaultSpots:6 },
 ];
 const LEVELS = ['Just trying it','Beginner','Improver','Confident','Any level'];
 const EVENT_TYPES = ['Tournament','Social','Coaching clinic','Club notice'];
-const COMMITTEE_CODE = 'LCC2026'; // change this and share only with the committee
+const MOODS = [
+  { id:'great', label:'Really helped me get out more', cls:'mood-great' },
+  { id:'good', label:'Good experience, found a buddy', cls:'mood-good' },
+  { id:'meh', label:'Fine, but no match yet', cls:'mood-meh' },
+];
+const COMMITTEE_CODE = 'LCC2026'; // change this line to your own password, then re-upload to GitHub
 
 function sportById(id){ return SPORTS.find(s=>s.id===id); }
 
@@ -359,6 +388,7 @@ function iconSvg(kind){
     bike: '<circle cx="6" cy="17" r="4"/><circle cx="18" cy="17" r="4"/><path d="M6 17l5-9h4l3 9M9 8h5" fill="none"/>',
     ball: '<circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18" fill="none" stroke-width="0.5"/>',
     golf: '<circle cx="7" cy="20" r="1.6"/><line x1="7" y1="20" x2="7" y2="3"/><path d="M7 3l9 4.5-9 4.5" fill="currentColor" stroke="none"/>',
+    cricket: '<ellipse cx="9" cy="15" rx="3" ry="7" transform="rotate(-25 9 15)"/><circle cx="18" cy="6" r="2.5"/>',
     hoop: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M6 6l12 12M18 6L6 18" fill="none" stroke-width="0.5"/>',
   };
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">${icons[kind]||icons.ball}</svg>`;
@@ -374,13 +404,18 @@ function emblem(sportId, size){
 let invites = [];
 let members = [];
 let events = [];
+let feedback = [];
 let activeTab = 'overview';
 let activeFilter = 'all';
 let loadingInvites = true;
 let loadingMembers = true;
 let loadingEvents = true;
+let loadingFeedback = true;
 let postSuccess = false;
 let eventSuccess = false;
+let editingEvent = null;
+let feedbackSuccess = false;
+let postKind = 'casual'; // 'casual' | 'team'
 let committeeUnlocked = false;
 let lockError = false;
 
@@ -403,11 +438,15 @@ function subscribeInvites(){
   });
 }
 async function addInvite(data){
-  await addDoc(collection(db, 'invites'), { ...data, created: Date.now() });
+  await addDoc(collection(db, 'invites'), { ...data, spotsFilled: 1, created: Date.now() });
 }
 async function removeInvite(id){
   await deleteDoc(doc(db, 'invites', id));
 }
+async function joinInvite(id){
+  await updateDoc(doc(db, 'invites', id), { spotsFilled: increment(1) });
+}
+const joinedThisSession = new Set();
 
 function subscribeMembers(){
   const q = query(collection(db, 'members'), orderBy('name'));
@@ -446,6 +485,28 @@ async function addEvent(data){
 async function removeEvent(id){
   await deleteDoc(doc(db, 'events', id));
 }
+async function editEvent(id, data){
+  await updateDoc(doc(db, 'events', id), data);
+}
+
+function subscribeFeedback(){
+  const q = query(collection(db, 'feedback'), orderBy('created', 'desc'));
+  onSnapshot(q, (snap)=>{
+    feedback = snap.docs.map(d=> ({ id: d.id, ...d.data() }));
+    loadingFeedback = false;
+    render();
+  }, (err)=>{
+    console.error('feedback listener failed', err);
+    loadingFeedback = false;
+    render();
+  });
+}
+async function addFeedback(data){
+  await addDoc(collection(db, 'feedback'), { ...data, created: Date.now() });
+}
+async function removeFeedback(id){
+  await deleteDoc(doc(db, 'feedback', id));
+}
 
 /* ---------------- HELPERS ---------------- */
 function timeAgo(ts){
@@ -456,6 +517,10 @@ function timeAgo(ts){
   const h = Math.floor(m/60);
   if(h < 24) return h+'h ago';
   return Math.floor(h/24)+'d ago';
+}
+function isMe(name){
+  const who = getWho().trim().toLowerCase();
+  return who && name && who === String(name).trim().toLowerCase();
 }
 function fmtDate(str){
   if(!str) return '';
@@ -487,6 +552,12 @@ function renderOverview(){
   } else {
     cardsHtml = '<div class="pin-grid">' + sorted.map(inv=>{
       const s = sportById(inv.sport) || {color:'#999'};
+      const needed = inv.spotsNeeded || 0;
+      const filled = inv.spotsFilled || 1;
+      const isFull = needed > 0 && filled >= needed;
+      const alreadyJoined = joinedThisSession.has(inv.id);
+      const isTeam = inv.kind === 'team';
+      const teamLabel = inv.teamNeed === 'need_team' ? "Looking to join a team" : "Needs a player";
       return `
       <div class="pin-card">
         <div class="pin-dot" style="background:${s.color};"></div>
@@ -494,13 +565,15 @@ function renderOverview(){
           ${emblem(inv.sport,30)}
           <div class="pin-sport">${s.name || inv.sport}</div>
         </div>
-        <div class="pin-title">${escapeHtml(inv.host)}'s game</div>
-        <div class="pin-meta">${fmtDate(inv.date)}${inv.time? ' · '+escapeHtml(inv.time):''}</div>
+        ${isTeam ? `<div class="team-badge">${teamLabel}${inv.eventName ? ' · '+escapeHtml(inv.eventName) : ''}</div>` : ''}
+        <div class="pin-title">${escapeHtml(inv.host)}'s ${isTeam ? (inv.teamNeed==='need_team' ? 'looking for a team' : 'team') : 'game'}</div>
+        <div class="pin-meta">${inv.date ? fmtDate(inv.date) : 'Date flexible'}${inv.time? ' · '+escapeHtml(inv.time):''}</div>
         <span class="level-badge">${escapeHtml(inv.level)}</span>
+        ${needed > 0 ? `<span class="level-badge" style="background:${isFull?'rgba(63,92,61,0.15)':'rgba(30,58,47,0.08)'};color:${isFull?'#3F5C3D':'#2A2A24'};margin-left:6px;">${isFull ? 'Full' : filled+' of '+needed+' confirmed'}</span>` : ''}
         ${inv.note ? `<div class="pin-note">${escapeHtml(inv.note)}</div>` : ''}
         <div class="pin-actions">
-          <button class="btn-small" data-join="${inv.id}">I'm in</button>
-          <button class="link-remove" data-remove="${inv.id}">remove</button>
+          <button class="btn-small" data-join="${inv.id}" ${(isFull || alreadyJoined) ? 'disabled style="opacity:0.5;cursor:default;"' : ''}>${alreadyJoined ? "You're in" : (isFull ? 'Full' : "I'm in")}</button>
+          ${isMe(inv.host) ? `<button class="link-remove" data-remove="${inv.id}">remove</button>` : ''}
         </div>
       </div>`;
     }).join('') + '</div>';
@@ -547,11 +620,12 @@ function eventCardHtml(ev){
     <div class="event-card">
       <div class="event-type">${escapeHtml(ev.type)}${s? ' · '+s.name : ''}</div>
       <div class="event-title">${escapeHtml(ev.title)}</div>
-      <div class="event-date">${fmtDate(ev.date)}</div>
+      <div class="event-date">${fmtDate(ev.date)}${ev.deadline ? ' · Entries close '+fmtDate(ev.deadline) : ''}</div>
+      ${ev.format ? `<div class="event-desc"><strong>Format:</strong> ${escapeHtml(ev.format)}</div>` : ''}
       ${ev.desc ? `<div class="event-desc">${escapeHtml(ev.desc)}</div>` : ''}
       <div class="event-foot">
-        <span>${ev.contact ? 'Contact: '+escapeHtml(ev.contact) : 'Posted by '+escapeHtml(ev.host)}</span>
-        ${committeeUnlocked ? `<button class="link-remove" data-removeevent="${ev.id}">remove</button>` : ''}
+        <span>${ev.contact ? 'Contact: '+escapeHtml(ev.contact) : 'Posted by '+escapeHtml(ev.host)}${ev.edited ? ' · edited' : ''}</span>
+        ${committeeUnlocked ? `<span><button class="link-remove" data-editevent="${ev.id}" style="margin-right:10px;">edit</button><button class="link-remove" data-removeevent="${ev.id}">remove</button></span>` : ''}
       </div>
     </div>
   `;
@@ -559,8 +633,8 @@ function eventCardHtml(ev){
 
 /* ---------------- RENDER: EVENTS TAB ---------------- */
 function renderEvents(){
-  const typeOpts = EVENT_TYPES.map(t=>`<option value="${t}">${t}</option>`).join('');
-  const sportOpts = `<option value="">General / all sports</option>` + SPORTS.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  const typeOpts = EVENT_TYPES.map(t=>`<option value="${t}" ${editingEvent && editingEvent.type===t ? 'selected':''}>${t}</option>`).join('');
+  const sportOpts = `<option value="" ${editingEvent && !editingEvent.sport ? 'selected':''}>General / all sports</option>` + SPORTS.map(s=>`<option value="${s.id}" ${editingEvent && editingEvent.sport===s.id ? 'selected':''}>${s.name}</option>`).join('');
   const sorted = [...events].sort((a,b)=> (a.date||'').localeCompare(b.date||''));
 
   let listHtml = '';
@@ -582,7 +656,7 @@ function renderEvents(){
       <form id="eventForm">
         <div class="field">
           <label>Event title</label>
-          <input type="text" id="e_title" placeholder="e.g. Club Tennis Tournament" required maxlength="60"/>
+          <input type="text" id="e_title" placeholder="e.g. Club Tennis Tournament" required maxlength="60" value="${editingEvent ? escapeHtml(editingEvent.title) : ''}"/>
         </div>
         <div class="row2">
           <div class="field">
@@ -597,22 +671,32 @@ function renderEvents(){
         <div class="row2">
           <div class="field">
             <label>Date</label>
-            <input type="date" id="e_date" required/>
+            <input type="date" id="e_date" required value="${editingEvent ? (editingEvent.date||'') : ''}"/>
           </div>
           <div class="field">
             <label>Your name</label>
-            <input type="text" id="e_host" required maxlength="30" placeholder="Posted by"/>
+            <input type="text" id="e_host" required maxlength="30" placeholder="Posted by" value="${editingEvent ? escapeHtml(editingEvent.host) : ''}"/>
           </div>
         </div>
         <div class="field">
+          <label>Format / categories (optional)</label>
+          <input type="text" id="e_format" placeholder="e.g. Teams of 5, one per category — cycling and running scored separately" value="${editingEvent ? escapeHtml(editingEvent.format||'') : ''}"/>
+          <div style="font-size:11.5px;color:#8a8a7a;margin-top:5px;">Spell this out up front — it's the #1 thing that ends up debated after the fact.</div>
+        </div>
+        <div class="field">
+          <label>Entry deadline (optional)</label>
+          <input type="date" id="e_deadline" value="${editingEvent ? (editingEvent.deadline||'') : ''}"/>
+        </div>
+        <div class="field">
           <label>Details</label>
-          <textarea id="e_desc" placeholder="e.g. Sign up by 5 Sept, entry open to all levels, knockout format"></textarea>
+          <textarea id="e_desc" placeholder="e.g. Starting time, number of winners per category, prizes">${editingEvent ? escapeHtml(editingEvent.desc||'') : ''}</textarea>
         </div>
         <div class="field">
           <label>Contact / sign-up (optional)</label>
-          <input type="text" id="e_contact" placeholder="e.g. WhatsApp Priya, or sign-up sheet at reception"/>
+          <input type="text" id="e_contact" placeholder="e.g. WhatsApp Priya, or sign-up sheet at reception" value="${editingEvent ? escapeHtml(editingEvent.contact||'') : ''}"/>
         </div>
-        <button type="submit" class="submit-btn">Post to bulletin board</button>
+        <button type="submit" class="submit-btn">${editingEvent ? 'Update notice' : 'Post to bulletin board'}</button>
+        ${editingEvent ? `<button type="button" id="cancelEditBtn" class="link-remove" style="display:block;margin:10px auto 0 auto;">cancel edit</button>` : ''}
       </form>
     </div>
   ` : `
@@ -643,17 +727,41 @@ function renderEvents(){
 function renderPost(){
   const opts = SPORTS.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
   const levelOpts = LEVELS.map(l=>`<option value="${l}">${l}</option>`).join('');
+  const openEvents = events.filter(ev=> ev.type === 'Tournament');
+  const eventOpts = `<option value="">Other / type it in below</option>` + openEvents.map(ev=>`<option value="${escapeHtml(ev.title)}">${escapeHtml(ev.title)}</option>`).join('');
+
   return `
     <div class="section-label">Post an invitation</div>
     <div class="section-title">Put a game on the board.</div>
     <div class="section-sub">Takes ten seconds. Anyone on the board can see it and turn up — you don't need to be any good.</div>
     ${postSuccess ? `<div class="confirm-msg">Pinned. Head to Overview to see it on the board.</div>` : ''}
+    <div class="type-toggle">
+      <div class="type-btn ${postKind==='casual'?'active':''}" data-postkind="casual">Casual game</div>
+      <div class="type-btn ${postKind==='team'?'active':''}" data-postkind="team">Team / tournament spot</div>
+    </div>
     <div class="form-card">
       <form id="postForm">
         <div class="field">
           <label>Your name</label>
           <input type="text" id="f_host" placeholder="e.g. Asha" required maxlength="30"/>
         </div>
+        ${postKind==='team' ? `
+        <div class="field">
+          <label>Which tournament / event?</label>
+          <select id="f_eventpick">${eventOpts}</select>
+        </div>
+        <div class="field">
+          <label>Event name (if not listed above)</label>
+          <input type="text" id="f_eventname" placeholder="e.g. Chairman's Cup Team Challenge"/>
+        </div>
+        <div class="field">
+          <label>What are you posting?</label>
+          <select id="f_teamneed">
+            <option value="need_player">My team needs a player for this sport</option>
+            <option value="need_team">I don't have a team — looking to join one</option>
+          </select>
+        </div>
+        ` : ''}
         <div class="row2">
           <div class="field">
             <label>Sport</label>
@@ -667,7 +775,7 @@ function renderPost(){
         <div class="row2">
           <div class="field">
             <label>Date</label>
-            <input type="date" id="f_date" required/>
+            <input type="date" id="f_date" ${postKind==='casual'?'required':''}/>
           </div>
           <div class="field">
             <label>Time</label>
@@ -675,10 +783,20 @@ function renderPost(){
           </div>
         </div>
         <div class="field">
-          <label>Note (optional)</label>
-          <textarea id="f_note" placeholder="e.g. Bringing spare rackets, total beginner welcome"></textarea>
+          <label>Players needed in total (including you)</label>
+          <input type="number" id="f_spots" min="1" max="30" placeholder="e.g. 4"/>
+          <div style="font-size:11.5px;color:#8a8a7a;margin-top:5px;">Leave blank if you don't mind however many turn up. Once your group's set, book the actual court/time through the official Gymkhana booking app.</div>
         </div>
-        <button type="submit" class="submit-btn">Pin to the board</button>
+        <div class="field">
+          <label>Note (optional)</label>
+          <textarea id="f_note" placeholder="${postKind==='team' ? 'e.g. Handicap 18 or under preferred, need someone by Friday' : 'e.g. Bringing spare rackets, total beginner welcome'}"></textarea>
+        </div>
+        <div class="field">
+          <label>Phone / WhatsApp (optional)</label>
+          <input type="text" id="f_contact" placeholder="e.g. 07XX XXX XXX"/>
+          <div style="font-size:11.5px;color:#8a8a7a;margin-top:5px;">Only shown to members who tap "I'm in" — not visible on the board itself.</div>
+        </div>
+        <button type="submit" class="submit-btn">${postKind==='team' ? 'Post to the board' : 'Pin to the board'}</button>
       </form>
     </div>
   `;
@@ -720,7 +838,7 @@ function renderMembers(){
           const s = sportById(id); return s ? `<span class="member-tag">${s.name}</span>` : '';
         }).join('')}</div>
         ${m.note ? `<div class="member-note">${escapeHtml(m.note)}</div>` : ''}
-        <div style="margin-top:8px;"><button class="link-remove" data-removemember="${m.id}">remove me</button></div>
+        ${isMe(m.name) ? `<div style="margin-top:8px;"><button class="link-remove" data-removemember="${m.id}">remove me</button></div>` : ''}
       </div>
     `).join('') + '</div>';
   }
@@ -749,6 +867,64 @@ function renderMembers(){
   `;
 }
 
+/* ---------------- RENDER: FEEDBACK ---------------- */
+function renderFeedback(){
+  const sportOpts = `<option value="">General / not sport-specific</option>` + SPORTS.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  const moodOpts = MOODS.map(m=>`<option value="${m.id}">${m.label}</option>`).join('');
+
+  let listHtml = '';
+  if(loadingFeedback){
+    listHtml = `<div class="empty-state"><div class="glyph">&#9679;</div><p>Loading feedback…</p></div>`;
+  } else if(feedback.length === 0){
+    listHtml = `<div class="empty-state"><div class="glyph">&#128172;</div><p>No feedback yet. Be the first to share how a game went.</p></div>`;
+  } else {
+    listHtml = '<div class="feedback-grid">' + feedback.map(f=>{
+      const mood = MOODS.find(m=>m.id===f.mood) || MOODS[1];
+      const s = f.sport ? sportById(f.sport) : null;
+      return `
+      <div class="feedback-card">
+        <span class="mood-badge ${mood.cls}">${mood.label}</span>
+        ${f.comment ? `<div class="feedback-quote">"${escapeHtml(f.comment)}"</div>` : ''}
+        <div class="feedback-foot">
+          <span>${escapeHtml(f.name)}${s ? ' · '+s.name : ''}</span>
+          ${isMe(f.name) ? `<button class="link-remove" data-removefeedback="${f.id}">remove</button>` : ''}
+        </div>
+      </div>`;
+    }).join('') + '</div>';
+  }
+
+  return `
+    <div class="section-label">How it's going</div>
+    <div class="section-title">Tell us how a game went.</div>
+    <div class="section-sub">Found a buddy? Tried a sport you wouldn't have otherwise? Let the committee know what's working — this feeds straight back into how the board gets improved.</div>
+    ${feedbackSuccess ? `<div class="confirm-msg">Thanks — feedback posted.</div>` : ''}
+    <div class="form-card" style="margin-bottom:30px;">
+      <form id="feedbackForm">
+        <div class="field">
+          <label>Your name</label>
+          <input type="text" id="fb_name" required maxlength="30" placeholder="e.g. Wanjiru"/>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Sport (optional)</label>
+            <select id="fb_sport">${sportOpts}</select>
+          </div>
+          <div class="field">
+            <label>How did it go?</label>
+            <select id="fb_mood">${moodOpts}</select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Tell us more (optional)</label>
+          <textarea id="fb_comment" placeholder="e.g. Posted on Sunday, had a tennis partner by Tuesday — first time I've played in years"></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Share feedback</button>
+      </form>
+    </div>
+    ${listHtml}
+  `;
+}
+
 /* ---------------- MAIN RENDER ---------------- */
 function render(){
   const main = document.getElementById('main');
@@ -757,6 +933,7 @@ function render(){
   else if(activeTab==='events') main.innerHTML = renderEvents();
   else if(activeTab==='sports') main.innerHTML = renderSports();
   else if(activeTab==='members') main.innerHTML = renderMembers();
+  else if(activeTab==='feedback') main.innerHTML = renderFeedback();
   attachHandlers();
 }
 
@@ -772,12 +949,24 @@ function attachHandlers(){
 
   // join / remove invite
   document.querySelectorAll('[data-join]').forEach(el=>{
-    el.addEventListener('click', ()=>{
+    el.addEventListener('click', async ()=>{
       const id = el.getAttribute('data-join');
       const inv = invites.find(i=>i.id===id);
-      if(inv){
-        alert(`You're in! Find ${inv.host} at the club to confirm — or post your own invite for ${sportById(inv.sport)?.name || inv.sport} to get others in too.`);
+      if(!inv || joinedThisSession.has(id)) return;
+      const needed = inv.spotsNeeded || 0;
+      const filled = inv.spotsFilled || 1;
+      if(needed > 0 && filled >= needed) return;
+      try{
+        await joinInvite(id);
+        joinedThisSession.add(id);
+      }catch(err){
+        console.error('join failed', err);
       }
+      const contactLine = inv.contact
+        ? `Reach ${inv.host} directly: ${inv.contact}`
+        : `${inv.host} didn't leave a contact number — look for them at the club, or post your own invite for ${sportById(inv.sport)?.name || inv.sport} to get others in too.`;
+      alert(`You're in!\n\n${contactLine}\n\nOnce your group's confirmed, book the actual court/time through the official Gymkhana booking app.`);
+      render();
     });
   });
   document.querySelectorAll('[data-remove]').forEach(el=>{
@@ -789,9 +978,26 @@ function attachHandlers(){
     });
   });
 
+  // type toggle (casual / team)
+  document.querySelectorAll('[data-postkind]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      postKind = el.getAttribute('data-postkind');
+      render();
+    });
+  });
+
   // post form
   const postForm = document.getElementById('postForm');
   if(postForm){
+    const sportSelect = document.getElementById('f_sport');
+    const spotsInput = document.getElementById('f_spots');
+    const applyDefaultSpots = ()=>{
+      const s = sportById(sportSelect.value);
+      if(s && s.defaultSpots) spotsInput.placeholder = 'e.g. ' + s.defaultSpots;
+    };
+    applyDefaultSpots();
+    sportSelect.addEventListener('change', applyDefaultSpots);
+
     postForm.addEventListener('submit', async (e)=>{
       e.preventDefault();
       const host = document.getElementById('f_host').value.trim();
@@ -800,14 +1006,25 @@ function attachHandlers(){
       const btn = postForm.querySelector('.submit-btn');
       btn.disabled = true; btn.textContent = 'Pinning…';
       try{
-        await addInvite({
+        const spotsVal = parseInt(spotsInput.value, 10);
+        const payload = {
           host,
-          sport: document.getElementById('f_sport').value,
+          sport: sportSelect.value,
           level: document.getElementById('f_level').value,
           date: document.getElementById('f_date').value,
           time: document.getElementById('f_time').value.trim(),
           note: document.getElementById('f_note').value.trim(),
-        });
+          contact: document.getElementById('f_contact').value.trim(),
+          spotsNeeded: (spotsVal > 0) ? spotsVal : 0,
+          kind: postKind,
+        };
+        if(postKind === 'team'){
+          const pick = document.getElementById('f_eventpick').value;
+          const typed = document.getElementById('f_eventname').value.trim();
+          payload.eventName = pick || typed;
+          payload.teamNeed = document.getElementById('f_teamneed').value;
+        }
+        await addInvite(payload);
         postSuccess = true;
       }catch(err){
         console.error('post invite failed', err);
@@ -900,32 +1117,96 @@ function attachHandlers(){
       if(!title || !host) return;
       localName = host;
       const btn = eventForm.querySelector('.submit-btn');
-      btn.disabled = true; btn.textContent = 'Posting…';
+      const payload = {
+        title,
+        type: document.getElementById('e_type').value,
+        sport: document.getElementById('e_sport').value,
+        date: document.getElementById('e_date').value,
+        host,
+        format: document.getElementById('e_format').value.trim(),
+        deadline: document.getElementById('e_deadline').value,
+        desc: document.getElementById('e_desc').value.trim(),
+        contact: document.getElementById('e_contact').value.trim(),
+      };
       try{
-        await addEvent({
-          title,
-          type: document.getElementById('e_type').value,
-          sport: document.getElementById('e_sport').value,
-          date: document.getElementById('e_date').value,
-          host,
-          desc: document.getElementById('e_desc').value.trim(),
-          contact: document.getElementById('e_contact').value.trim(),
-        });
+        if(editingEvent){
+          btn.disabled = true; btn.textContent = 'Updating…';
+          await editEvent(editingEvent.id, { ...payload, edited: true });
+          editingEvent = null;
+        } else {
+          btn.disabled = true; btn.textContent = 'Posting…';
+          await addEvent(payload);
+        }
         eventSuccess = true;
       }catch(err){
         console.error('post event failed', err);
-        alert('Could not post the notice — check your connection and try again.');
+        alert('Could not save the notice — check your connection and try again.');
       }
       btn.disabled = false;
       render();
     });
   }
+  const cancelEditBtn = document.getElementById('cancelEditBtn');
+  if(cancelEditBtn){
+    cancelEditBtn.addEventListener('click', ()=>{
+      editingEvent = null;
+      render();
+    });
+  }
+  document.querySelectorAll('[data-editevent]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(!committeeUnlocked) return;
+      const id = el.getAttribute('data-editevent');
+      const ev = events.find(x=>x.id===id);
+      if(ev){
+        editingEvent = ev;
+        eventSuccess = false;
+        render();
+        document.querySelector('.form-card')?.scrollIntoView({behavior:'smooth', block:'start'});
+      }
+    });
+  });
   document.querySelectorAll('[data-removeevent]').forEach(el=>{
     el.addEventListener('click', async ()=>{
       if(!committeeUnlocked) return;
       const id = el.getAttribute('data-removeevent');
       if(confirm('Remove this notice from the bulletin board?')){
         await removeEvent(id);
+      }
+    });
+  });
+
+  // feedback form
+  const feedbackForm = document.getElementById('feedbackForm');
+  if(feedbackForm){
+    feedbackForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const name = document.getElementById('fb_name').value.trim();
+      if(!name) return;
+      localName = name;
+      const btn = feedbackForm.querySelector('.submit-btn');
+      btn.disabled = true; btn.textContent = 'Posting…';
+      try{
+        await addFeedback({
+          name,
+          sport: document.getElementById('fb_sport').value,
+          mood: document.getElementById('fb_mood').value,
+          comment: document.getElementById('fb_comment').value.trim(),
+        });
+        feedbackSuccess = true;
+      }catch(err){
+        console.error('post feedback failed', err);
+        alert('Could not post your feedback — check your connection and try again.');
+      }
+      btn.disabled = false;
+      render();
+    });
+  }
+  document.querySelectorAll('[data-removefeedback]').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      const id = el.getAttribute('data-removefeedback');
+      if(confirm('Remove this feedback?')){
+        await removeFeedback(id);
       }
     });
   });
@@ -948,11 +1229,15 @@ function setActiveTabButton(){
 }
 
 /* ---------------- NAV ---------------- */
+document.getElementById('whoInput').addEventListener('input', ()=>{
+  render();
+});
 document.getElementById('tabs').addEventListener('click', (e)=>{
   const btn = e.target.closest('button[data-tab]');
   if(!btn) return;
   activeTab = btn.getAttribute('data-tab');
   postSuccess = false;
+  editingEvent = null;
   setActiveTabButton();
   render();
 });
@@ -962,6 +1247,7 @@ render();
 subscribeInvites();
 subscribeMembers();
 subscribeEvents();
+subscribeFeedback();
 </script>
 </body>
 </html>
