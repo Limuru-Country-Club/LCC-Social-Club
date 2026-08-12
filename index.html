@@ -522,10 +522,27 @@ function isMe(name){
   const who = getWho().trim().toLowerCase();
   return who && name && who === String(name).trim().toLowerCase();
 }
+function todayStr(){
+  const d = new Date();
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+function todayHeroStr(){
+  return new Date().toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
+}
+function activeInvites(){
+  const today = todayStr();
+  // no date, or a malformed date, = "flexible", never expires.
+  return invites.filter(i => !i.date || !/^\d{4}-\d{2}-\d{2}$/.test(i.date) || i.date >= today);
+}
 function fmtDate(str){
   if(!str) return '';
+  // HTML5 date inputs should always give YYYY-MM-DD, but manual keyboard entry
+  // can produce malformed values (e.g. "60814-02-02") — validate strictly before parsing.
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(str)) return '';
   const d = new Date(str+'T00:00:00');
-  if(isNaN(d)) return str;
+  if(isNaN(d)) return '';
   return d.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
 }
 function escapeHtml(str){
@@ -536,7 +553,7 @@ function escapeHtml(str){
 
 /* ---------------- RENDER: OVERVIEW ---------------- */
 function renderOverview(){
-  const filtered = activeFilter==='all' ? invites : invites.filter(i=>i.sport===activeFilter);
+  const filtered = activeFilter==='all' ? activeInvites() : activeInvites().filter(i=>i.sport===activeFilter);
   const sorted = [...filtered].sort((a,b)=> (a.date||'').localeCompare(b.date||''));
 
   let chipsHtml = `<div class="chip ${activeFilter==='all'?'active':''}" data-filter="all">All sports</div>`;
@@ -581,7 +598,7 @@ function renderOverview(){
 
   return `
     <div class="hero">
-      <div class="eyebrow">Sun, 9 Aug &nbsp;·&nbsp; LCC social board</div>
+      <div class="eyebrow">${todayHeroStr()} &nbsp;·&nbsp; LCC social board</div>
       <h1 class="hero-title">The board's always open.</h1>
       <div class="hero-sub">Pin a game, join one already up, or just see who's around this week at Limuru Country Club. No skill required to post — that's the whole point.</div>
     </div>
@@ -805,7 +822,7 @@ function renderPost(){
 /* ---------------- RENDER: SPORTS ---------------- */
 function renderSports(){
   const cards = SPORTS.map(s=>{
-    const count = invites.filter(i=>i.sport===s.id).length;
+    const count = activeInvites().filter(i=>i.sport===s.id).length;
     return `
     <div class="sport-card" data-sport="${s.id}">
       ${emblem(s.id,38)}
