@@ -416,6 +416,7 @@ let eventSuccess = false;
 let editingEvent = null;
 let feedbackSuccess = false;
 let postKind = 'casual'; // 'casual' | 'team'
+let postSport = 'tennis';
 let committeeUnlocked = false;
 let lockError = false;
 
@@ -587,6 +588,7 @@ function renderOverview(){
         <div class="pin-meta">${inv.date ? fmtDate(inv.date) : 'Date flexible'}${inv.time? ' · '+escapeHtml(inv.time):''}</div>
         <span class="level-badge">${escapeHtml(inv.level)}</span>
         ${needed > 0 ? `<span class="level-badge" style="background:${isFull?'rgba(63,92,61,0.15)':'rgba(30,58,47,0.08)'};color:${isFull?'#3F5C3D':'#2A2A24'};margin-left:6px;">${isFull ? 'Full' : filled+' of '+needed+' confirmed'}</span>` : ''}
+        ${inv.sport==='golf' && (inv.handicap || inv.golfGoal || inv.holes) ? `<div style="margin-top:6px;font-size:12px;color:#6b6b5e;">${inv.handicap ? 'Handicap '+escapeHtml(inv.handicap) : ''}${inv.handicap && inv.holes ? ' · ' : ''}${inv.holes ? escapeHtml(inv.holes)+' holes' : ''}${(inv.handicap||inv.holes) && inv.golfGoal ? ' · ' : ''}${escapeHtml(inv.golfGoal||'')}</div>` : ''}
         ${inv.note ? `<div class="pin-note">${escapeHtml(inv.note)}</div>` : ''}
         <div class="pin-actions">
           <button class="btn-small" data-join="${inv.id}" ${(isFull || alreadyJoined) ? 'disabled style="opacity:0.5;cursor:default;"' : ''}>${alreadyJoined ? "You're in" : (isFull ? 'Full' : "I'm in")}</button>
@@ -742,7 +744,7 @@ function renderEvents(){
 
 /* ---------------- RENDER: POST ---------------- */
 function renderPost(){
-  const opts = SPORTS.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  const opts = SPORTS.map(s=>`<option value="${s.id}" ${postSport===s.id?'selected':''}>${s.name}</option>`).join('');
   const levelOpts = LEVELS.map(l=>`<option value="${l}">${l}</option>`).join('');
   const openEvents = events.filter(ev=> ev.type === 'Tournament');
   const eventOpts = `<option value="">Other / type it in below</option>` + openEvents.map(ev=>`<option value="${escapeHtml(ev.title)}">${escapeHtml(ev.title)}</option>`).join('');
@@ -789,6 +791,30 @@ function renderPost(){
             <select id="f_level">${levelOpts}</select>
           </div>
         </div>
+        ${postSport==='golf' ? `
+        <div class="row2">
+          <div class="field">
+            <label>Your handicap (optional)</label>
+            <input type="number" id="f_handicap" min="0" max="54" placeholder="e.g. 18"/>
+          </div>
+          <div class="field">
+            <label>Holes</label>
+            <select id="f_holes">
+              <option value="18">18 holes</option>
+              <option value="9">9 holes</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>What are you after?</label>
+          <select id="f_golfgoal">
+            <option value="Casual round">Casual round — just good company</option>
+            <option value="Similar handicap">A game against a similar handicap</option>
+            <option value="Training partner">A training/practice partner, not scored</option>
+            <option value="Competition">Competition or matchplay practice</option>
+          </select>
+        </div>
+        ` : ''}
         <div class="row2">
           <div class="field">
             <label>Date</label>
@@ -1013,7 +1039,10 @@ function attachHandlers(){
       if(s && s.defaultSpots) spotsInput.placeholder = 'e.g. ' + s.defaultSpots;
     };
     applyDefaultSpots();
-    sportSelect.addEventListener('change', applyDefaultSpots);
+    sportSelect.addEventListener('change', ()=>{
+      postSport = sportSelect.value;
+      render();
+    });
 
     postForm.addEventListener('submit', async (e)=>{
       e.preventDefault();
@@ -1040,6 +1069,12 @@ function attachHandlers(){
           const typed = document.getElementById('f_eventname').value.trim();
           payload.eventName = pick || typed;
           payload.teamNeed = document.getElementById('f_teamneed').value;
+        }
+        if(sportSelect.value === 'golf'){
+          const hcap = document.getElementById('f_handicap')?.value;
+          payload.handicap = hcap ? hcap.trim() : '';
+          payload.holes = document.getElementById('f_holes')?.value || '';
+          payload.golfGoal = document.getElementById('f_golfgoal')?.value || '';
         }
         await addInvite(payload);
         postSuccess = true;
